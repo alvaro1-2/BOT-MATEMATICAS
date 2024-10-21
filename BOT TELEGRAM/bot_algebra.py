@@ -1,6 +1,26 @@
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Application, CommandHandler, ContextTypes, CallbackQueryHandler
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    ContextTypes,
+    CallbackQueryHandler,
+)
+import logging
 import random
+import time
+
+# Configurar el registro de logs
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
+
+# Función para manejar errores globalmente
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Maneja los errores y excepciones."""
+    logger.error(msg="Ocurrió un error:", exc_info=context.error)
+    # Puedes implementar más lógica aquí si lo deseas, como notificar al administrador, etc.
 
 # Función para iniciar el bot y mostrar el menú principal
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -216,6 +236,9 @@ async def send_photo_with_caption(query, image_path: str, caption: str):
             await query.message.reply_photo(photo=photo, caption=caption, parse_mode='Markdown')
     except FileNotFoundError:
         await query.message.reply_text("Lo siento, la imagen no está disponible en este momento.")
+    except Exception as e:
+        logger.error(f"Error al enviar la imagen: {e}")
+        await query.message.reply_text("Ocurrió un error al enviar la imagen.")
 
 # Función para enviar una imagen y una frase aleatoria de Señor Meeseeks
 async def send_meeseeks(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -244,11 +267,20 @@ async def send_meeseeks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.reply_photo(photo=photo, caption=frase)
     except FileNotFoundError:
         await query.message.reply_text(frase)
+    except Exception as e:
+        logger.error(f"Error al enviar la imagen de Meeseeks: {e}")
+        await query.message.reply_text("Ocurrió un error al enviar la imagen de Meeseeks.")
 
 # Configuración principal del bot
 def main():
     # Reemplaza 'YOUR_BOT_TOKEN' con el token de tu bot
-    application = Application.builder().token('8099377584:AAG_yiQtBroxjgtnsuwnTmQfDZ622-PfnVY').build()
+    TOKEN = '8099377584:AAG_yiQtBroxjgtnsuwnTmQfDZ622-PfnVY'
+
+    # Construir la aplicación
+    application = Application.builder().token(TOKEN).build()
+
+    # Agregar manejador de errores
+    application.add_error_handler(error_handler)
 
     # Comandos principales
     application.add_handler(CommandHandler('start', start))
@@ -258,7 +290,13 @@ def main():
     application.add_handler(CallbackQueryHandler(button))
 
     # Iniciar el bot y mantenerlo corriendo
-    application.run_polling()
+    application.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
-    main()
+    while True:
+        try:
+            main()
+        except Exception as e:
+            logger.error(f"El bot se detuvo debido a un error: {e}")
+            logger.info("Reiniciando el bot en 5 segundos...")
+            time.sleep(5)
