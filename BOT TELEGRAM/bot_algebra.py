@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Maneja los errores y excepciones."""
     logger.error(msg="Ocurrió un error:", exc_info=context.error)
-    # Puedes implementar más lógica aquí si lo deseas, como notificar al administrador, etc.
 
 # Función para iniciar el bot y mostrar el menú principal
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -176,10 +175,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
 
-    # Aquí manejamos los subtemas finales que envían imágenes y textos
     else:
-        # Asumimos que el data coincide con el nombre de la función
-        # Llamamos a la función correspondiente
         await send_topic(update, data)
 
 # Función para enviar el contenido de cada tema
@@ -260,7 +256,7 @@ async def send_meeseeks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
 
     frase = random.choice(frases_meeseeks)
-    image_path = 'images/meeseeks.png'  # Asegúrate de tener esta imagen en la carpeta 'images'
+    image_path = 'images/meeseeks.png' 
 
     try:
         with open(image_path, 'rb') as photo:
@@ -274,9 +270,8 @@ async def send_meeseeks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Configuración principal del bot
 def main():
     # Reemplaza 'YOUR_BOT_TOKEN' con el token de tu bot
-    TOKEN = '8099377584:AAG_yiQtBroxjgtnsuwnTmQfDZ622-PfnVY'
+    TOKEN = ''
 
-    # Construir la aplicación
     application = Application.builder().token(TOKEN).build()
 
     # Agregar manejador de errores
